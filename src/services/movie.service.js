@@ -222,7 +222,23 @@ export default class MovieService {
    */
   // tag::getUserFavorites[]
   async getUserFavorites(tx, userId) {
-    return []
+    // If userId is not defined, return an empty array
+    if ( userId === undefined ) {
+      return []
+    }
+  
+    const favoriteResult = await tx.run(
+      `
+        MATCH (:User {userId: $userId})-[:HAS_FAVORITE]->(m)
+        RETURN m.tmdbId AS id
+      `,
+      { userId, }
+    )
+  
+    // Extract the `id` value returned by the cypher query
+    return favoriteResult.records.map(
+      row => row.get('id')
+    )
   }
   // end::getUserFavorites[]
 
